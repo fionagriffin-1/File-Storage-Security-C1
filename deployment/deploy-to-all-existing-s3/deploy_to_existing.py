@@ -157,10 +157,12 @@ def deploy_storage(kms_arn, region, bucket_name):
     S3_Encryption = {"ParameterKey": "KMSKeyARNForBucketSSE", "ParameterValue": kms_arn}
     cft_client = boto3.client("cloudformation", config=my_region_config)
         
+    
     # using python sdk to deploy cft [cant define region though so all is deployed to my default]
+    cfbucketname = bucket_name.replace(".","-")
     cft_client.create_stack(
-        StackName="C1-FSS-Storage-" + bucket_name,
-        TemplateURL="https://file-storage-security.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
+        StackName="C1-FSS-Storage-" + cfbucketname,
+        TemplateURL="https://file-storage-security-workaround.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
         Parameters=[
             ExternalID,
             S3BucketToScan,
@@ -172,8 +174,8 @@ def deploy_storage(kms_arn, region, bucket_name):
         Capabilities=["CAPABILITY_IAM"],
     )  
     cft_waiter = cft_client.get_waiter("stack_create_complete")
-    cft_waiter.wait(StackName="C1-FSS-Storage-" + bucket_name)
-    res = cft_client.describe_stacks(StackName="C1-FSS-Storage-" + bucket_name)
+    cft_waiter.wait(StackName="C1-FSS-Storage-" + cfbucketname)
+    res = cft_client.describe_stacks(StackName="C1-FSS-Storage-" + cfbucketname)
     storage_stack = res["Stacks"][0]["Outputs"][2]["OutputValue"]
     #gather scanner stack id
     id_call = http.request('GET', stacks_api_url+"stacks", headers = {'api-secret-key': ws_api, 'Api-Version': 'v1'})
