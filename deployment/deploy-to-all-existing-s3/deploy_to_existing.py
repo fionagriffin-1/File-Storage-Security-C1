@@ -27,7 +27,7 @@ aws_account_id = args.account
 sqs_url = args.sqs
 ws_api = args.apikey
 filename = "exclude.txt"
-stacks_api_url = "https://cloudone.trendmicro.com/api/filestorage/"
+stacks_api_url = "https://filestorage.us-1.cloudone.trendmicro.com/api/"
 
 #get list of buckets to exclude from deployment
 def get_exclusions(filename):
@@ -160,6 +160,7 @@ def deploy_storage(kms_arn, region, bucket_name):
     
     # using python sdk to deploy cft [cant define region though so all is deployed to my default]
     cfbucketname = bucket_name.replace(".","-")
+    print(f"create stack for {bucket_name}")
     cft_client.create_stack(
         StackName="C1-FSS-Storage-" + cfbucketname,
         TemplateURL="https://file-storage-security-workaround.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
@@ -212,6 +213,6 @@ def add_to_cloudone(ws_api, stack_id, storage_stack):
         body=encoded_msg,
     )
     transform = json.loads(resp.data.decode("utf-8"))
-    url = "https://cloudone.trendmicro.com/api/filestorage/stacks/"+transform['stackID']
+    url = "https://filestorage.us-1.cloudone.trendmicro.com/api/stacks/"+transform['stackID']
 
 get_exclusions(filename)

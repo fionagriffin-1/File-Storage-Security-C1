@@ -1,2 +1,1 @@
-buckets-to-exclude-here
-another.bucket.to.exclude
+cf-templates-1nvbrlnl6v6ks-ap-southeast-2
