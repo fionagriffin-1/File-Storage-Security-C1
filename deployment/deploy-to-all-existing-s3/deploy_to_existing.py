@@ -53,6 +53,7 @@ def get_buckets(content):
         all_buckets = list_of_buckets.append(buckets['Name'])
     # remove excluded buckets from list
     for item in content:
+        print(item)
         list_of_buckets.remove(item)
     get_encryption_region(list_of_buckets)
 
@@ -90,6 +91,7 @@ def get_encryption_region(list_of_buckets):
                     region = "us-east-1"
          # check bucket tags
         try:
+            print(bucket_name)
             response = s3_client.get_bucket_tagging(Bucket=bucket_name)
             tags = response["TagSet"]
             tag_status = tags
@@ -133,7 +135,7 @@ def deploy_storage(kms_arn, region, bucket_name):
         "GET",
         stacks_api_url+"external-id",
         headers={
-            "api-secret-key": ws_api,
+            "Authorization": "ApiKey " + ws_api,
             "Api-Version": "v1",
         },
     )
@@ -155,12 +157,11 @@ def deploy_storage(kms_arn, region, bucket_name):
         "ParameterValue": aws_account_id,
     }
     S3_Encryption = {"ParameterKey": "KMSKeyARNForBucketSSE", "ParameterValue": kms_arn}
-    cft_client = boto3.client("cloudformation", config=my_region_config)
+    cft_client = boto3.client("cloudformation")
         
     
     # using python sdk to deploy cft [cant define region though so all is deployed to my default]
     cfbucketname = bucket_name.replace(".","-")
-    print(f"create stack for {bucket_name}")
     cft_client.create_stack(
         StackName="C1-FSS-Storage-" + cfbucketname,
         TemplateURL="https://file-storage-security-workaround.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
@@ -179,7 +180,7 @@ def deploy_storage(kms_arn, region, bucket_name):
     res = cft_client.describe_stacks(StackName="C1-FSS-Storage-" + cfbucketname)
     storage_stack = res["Stacks"][0]["Outputs"][2]["OutputValue"]
     #gather scanner stack id
-    id_call = http.request('GET', stacks_api_url+"stacks", headers = {'api-secret-key': ws_api, 'Api-Version': 'v1'})
+    id_call = http.request('GET', stacks_api_url+"stacks",fields={"limit": "100"}, headers = {'Authorization': 'ApiKey ' + ws_api, 'Api-Version': 'v1'})
     try:
         id_resp = json.loads(id_call.data.decode('utf-8'))['stacks']
     except json.decoder.JSONDecodeError:
@@ -207,7 +208,7 @@ def add_to_cloudone(ws_api, stack_id, storage_stack):
         stacks_api_url+"stacks",
         headers={
             "Content-Type": "application/json",
-            "api-secret-key": ws_api,
+            "Authorization": "ApiKey " + ws_api,
             "Api-Version": "v1",
         },
         body=encoded_msg,
