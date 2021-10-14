@@ -53,7 +53,6 @@ def get_buckets(content):
         all_buckets = list_of_buckets.append(buckets['Name'])
     # remove excluded buckets from list
     for item in content:
-        print(item)
         list_of_buckets.remove(item)
     get_encryption_region(list_of_buckets)
 
@@ -180,7 +179,7 @@ def deploy_storage(kms_arn, region, bucket_name):
     res = cft_client.describe_stacks(StackName="C1-FSS-Storage-" + cfbucketname)
     storage_stack = res["Stacks"][0]["Outputs"][2]["OutputValue"]
     #gather scanner stack id
-    id_call = http.request('GET', stacks_api_url+"stacks",fields={"limit": "100"}, headers = {'Authorization': 'ApiKey ' + ws_api, 'Api-Version': 'v1'})
+    id_call = http.request('GET', stacks_api_url+"stacks",fields={"limit": "100", "type": "scanner"}, headers = {'Authorization': 'ApiKey ' + ws_api, 'Api-Version': 'v1'})
     try:
         id_resp = json.loads(id_call.data.decode('utf-8'))['stacks']
     except json.decoder.JSONDecodeError:
