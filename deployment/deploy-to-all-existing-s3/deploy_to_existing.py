@@ -163,7 +163,7 @@ def deploy_storage(kms_arn, region, bucket_name):
     cfbucketname = bucket_name.replace(".","-")
     cft_client.create_stack(
         StackName="C1-FSS-Storage-" + cfbucketname,
-        TemplateURL="https://file-storage-security-workaround.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
+        TemplateURL="https://file-storage-security.s3.amazonaws.com/latest/templates/FSS-Storage-Stack.template",
         Parameters=[
             ExternalID,
             S3BucketToScan,
