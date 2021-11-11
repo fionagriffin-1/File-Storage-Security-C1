@@ -156,7 +156,7 @@ def deploy_storage(kms_arn, region, bucket_name):
         "ParameterValue": aws_account_id,
     }
     S3_Encryption = {"ParameterKey": "KMSKeyARNForBucketSSE", "ParameterValue": kms_arn}
-    cft_client = boto3.client("cloudformation")
+    cft_client = boto3.client("cloudformation", region)
         
     
     # using python sdk to deploy cft [cant define region though so all is deployed to my default]
